@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import axios from "axios";
+import cors from "cors";
 import { categoriesLink, productsLink } from "./urls.js";
 
 const app = express();
@@ -12,16 +13,19 @@ app.listen(port, () => {
 });
 
 //Enable CORS
-app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header(
-		"Access-Control-Allow-Headers",
-		"Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method"
-	);
-	res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-	res.header("Allow", "GET, POST, OPTIONS, PUT, DELETE");
-	next();
-});
+const whiteList = [process.env.FRONTEND_URL];
+
+const corsOptions = {
+	origin: function (origin, callback) {
+		if (whiteList.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Error de CORS"));
+		}
+	},
+};
+
+app.use(cors(corsOptions));
 
 app.get("/", (req, res) => {
 	res.json({ message: "Hello World!" });
